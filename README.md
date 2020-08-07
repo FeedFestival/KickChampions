@@ -1,2 +1,2 @@
 # KickChampions
-![Image of Yaktocat](https://imgur.com/1DpRspC)
+![Image of Yaktocat](https://i.imgur.com/1DpRspC.png)
