@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UIElements;
 
 public enum CameraPosition
 {
@@ -11,6 +10,10 @@ public enum CameraPosition
 
 public class CameraPositioning : MonoBehaviour
 {
+    // public GameObject BroadcastCameraToggle;
+    // public Toggle _broadcastCameraToggle;
+    private bool _canBroadcastCamera;
+
     public Vector3 ShootingPos;
     public Vector3 ShootingRot;
     public float ShootingPersp;
@@ -27,22 +30,31 @@ public class CameraPositioning : MonoBehaviour
         _camera = GetComponent<Camera>();
     }
 
+    void Start()
+    {
+        // _broadcastCameraToggle = BroadcastCameraToggle.GetComponent<Toggle>();
+        // _broadcastCameraToggle.value = true;
+    }
+
+    public void OnBroadcastCameraToggle()
+    {
+        _canBroadcastCamera = !_canBroadcastCamera;
+    }
+
     public void MoveCamera(CameraPosition cameraPosition, bool instant = false)
     {
-        _lookAt = false;
         switch (cameraPosition)
         {
             case CameraPosition.Broadcast:
-                if (instant)
+                if (_canBroadcastCamera == false)
                 {
-                    transform.position = BroadcastPos;
-                    transform.eulerAngles = BroadcastRot;
-                    _camera.fieldOfView = BroadcastPersp;
-                    _lookAt = true;
                     return;
                 }
+                MoveToBroadcast();
+
                 break;
             case CameraPosition.Shooting:
+                _lookAt = false;
                 if (instant)
                 {
                     transform.position = ShootingPos;
@@ -56,6 +68,18 @@ public class CameraPositioning : MonoBehaviour
         }
     }
 
+    public void MoveToBroadcast(bool instant = false)
+    {
+        if (instant)
+        {
+            transform.position = BroadcastPos;
+            transform.eulerAngles = BroadcastRot;
+            _camera.fieldOfView = BroadcastPersp;
+            _lookAt = true;
+            return;
+        }
+    }
+
     void LateUpdate()
     {
         if (_lookAt == false)
@@ -64,7 +88,7 @@ public class CameraPositioning : MonoBehaviour
         }
         transform.LookAt(Game.Instance.Ball.transform);
         var y = transform.eulerAngles.y > 90 ? BroadcastRot.y : transform.eulerAngles.y;
-        y = y < 52 ? 52 : y; 
+        y = y < 52 ? 52 : y;
 
         LookAtVector = new Vector3(BroadcastRot.x, y, BroadcastRot.z);
         transform.eulerAngles = LookAtVector;

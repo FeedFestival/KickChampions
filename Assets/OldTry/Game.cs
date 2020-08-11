@@ -13,6 +13,7 @@ public class Game : MonoBehaviour
     public Ball Ball;
     public Kicker Kicker;
     public CameraPositioning CameraPositioning;
+    public GameShooter GameShooter;
 
     void Awake()
     {

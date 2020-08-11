@@ -22,10 +22,14 @@ public class Kicker : MonoBehaviour
 
     public void Reset()
     {
-        transform.position = OriginalPos;
-        transform.eulerAngles = OriginalRot;
-
+        MoveTo(OriginalPos, OriginalRot);
         _rb.velocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
+    }
+
+    public void MoveTo(Vector3 pos, Vector3 rot)
+    {
+        transform.position = OriginalPos;
+        transform.eulerAngles = OriginalRot;
     }
 }

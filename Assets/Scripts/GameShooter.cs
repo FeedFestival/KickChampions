@@ -22,7 +22,7 @@ public class GameShooter : MonoBehaviour
         }
     }
 
-    private void TryShoot()
+    public void TryShoot()
     {
         var target = BootRb.transform.forward;
         // target = new Vector3(target.x, 0.5f, target.z);
@@ -33,5 +33,7 @@ public class GameShooter : MonoBehaviour
         // Debug.Log(dir);
         BootRb.AddForce(dir, ForceMode.Impulse);
         //_rb.AddRelativeForce(dir, ForceMode.Acceleration);
+
+        ReplayController.Instance.Record();
     }
 }

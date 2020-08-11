@@ -18,6 +18,7 @@ public class Ball : MonoBehaviour
     private Rigidbody _rb;
 
     public Vector3 OriginalPos;
+    public bool CanStopRecording;
 
     void Awake()
     {
@@ -84,6 +85,21 @@ public class Ball : MonoBehaviour
                 _rb.AddRelativeTorque(new Vector3(-(LeftAmmount * 100), 0, 0), ForceMode.VelocityChange);
             }
             // Debug.Log(_rb.angularVelocity);
+        }
+    }
+
+    void LateUpdate()
+    {
+        if (CanStopRecording)
+        {
+            if (_rb.velocity.magnitude < 2)
+            {
+                ReplayController.Instance.StopRecording();
+            }
+            else
+            {
+                // Debug.Log(_rb.velocity.magnitude);
+            }
         }
     }
 }
