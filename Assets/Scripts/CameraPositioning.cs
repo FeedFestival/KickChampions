@@ -20,14 +20,14 @@ public class CameraPositioning : MonoBehaviour
     public Vector3 BroadcastPos;
     public Vector3 BroadcastRot;
     public float BroadcastPersp;
-    private Camera _camera;
+    public Camera Camera;
     private bool _lookAt;
     public Vector3 LookAtVector;
 
     // Start is called before the first frame update
     void Awake()
     {
-        _camera = GetComponent<Camera>();
+        Camera = GetComponent<Camera>();
     }
 
     void Start()
@@ -59,7 +59,7 @@ public class CameraPositioning : MonoBehaviour
                 {
                     transform.position = ShootingPos;
                     transform.eulerAngles = ShootingRot;
-                    _camera.fieldOfView = ShootingPersp;
+                    Camera.fieldOfView = ShootingPersp;
                     return;
                 }
                 break;
@@ -74,7 +74,7 @@ public class CameraPositioning : MonoBehaviour
         {
             transform.position = BroadcastPos;
             transform.eulerAngles = BroadcastRot;
-            _camera.fieldOfView = BroadcastPersp;
+            Camera.fieldOfView = BroadcastPersp;
             _lookAt = true;
             return;
         }
