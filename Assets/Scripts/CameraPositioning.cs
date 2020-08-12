@@ -8,6 +8,12 @@ public enum CameraPosition
     TrackBall
 }
 
+public enum CameraTrack
+{
+    Ball,
+    Replay
+}
+
 public class CameraPositioning : MonoBehaviour
 {
     // public GameObject BroadcastCameraToggle;
@@ -23,6 +29,7 @@ public class CameraPositioning : MonoBehaviour
     public Camera Camera;
     private bool _lookAt;
     public Vector3 LookAtVector;
+    public CameraTrack CameraTrack;
 
     // Start is called before the first frame update
     void Awake()
@@ -50,7 +57,7 @@ public class CameraPositioning : MonoBehaviour
                 {
                     return;
                 }
-                MoveToBroadcast();
+                MoveToBroadcast(true);
 
                 break;
             case CameraPosition.Shooting:
@@ -86,7 +93,12 @@ public class CameraPositioning : MonoBehaviour
         {
             return;
         }
-        transform.LookAt(Game.Instance.Ball.transform);
+        if (CameraTrack == CameraTrack.Ball)
+        {
+            transform.LookAt(Game.Instance.Ball.transform);
+        } else {
+            transform.LookAt(Game.Instance.ReplayBall.transform);
+        }
         var y = transform.eulerAngles.y > 90 ? BroadcastRot.y : transform.eulerAngles.y;
         y = y < 52 ? 52 : y;
 

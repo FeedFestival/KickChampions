@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using Assets.Scripts.Utils;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ReplayController : MonoBehaviour
 {
-    public GameObject ReplayBall;
+    [SerializeField]
+    public GameObject ReplaySpeedSlider;
+    private UnityEngine.UI.Slider _replaySpeedSlider;
+    public Button PlayRecordButton;
     private static ReplayController _replayController;
     public static ReplayController Instance
     {
@@ -24,13 +28,24 @@ public class ReplayController : MonoBehaviour
     private TimeSpan _elapsedTime;
     private DateTime _fullStartTime;
     private TimeSpan _fullElapsedTime;
-    private float _percentOffset;
+    public float PercentOffset;
+    public int ReplaySpeed;
 
     private int frames;
 
     void Awake()
     {
         _replayController = this;
+        ReplaySpeed = 0;
+        PlayRecordButton.interactable = false;
+    }
+
+    public void OnReplaySpeedChange() {
+        if (_replaySpeedSlider == null) {
+            _replaySpeedSlider = ReplaySpeedSlider.GetComponent<UnityEngine.UI.Slider>();
+        }
+        ReplaySpeed = (int)Mathf.Floor(_replaySpeedSlider.value * 100);
+        Debug.Log(ReplaySpeed);
     }
 
     public void Record()
@@ -43,31 +58,30 @@ public class ReplayController : MonoBehaviour
     public void StopRecording()
     {
         _fullElapsedTime = DateTime.Now - _fullStartTime;
-        // Debug.Log(_fullElapsedTime.Seconds);
-        Debug.Log(ReplayOptions.Count);
+        
         float fullTime = 0;
         ReplayOptions.ForEach(rp => fullTime += rp.Seconds);
-        // Debug.Log(fullTime);
 
-        _percentOffset = Mathf.Floor(UsefullUtils.GetValuePercent(_fullElapsedTime.Seconds, fullTime));
+        PercentOffset = Mathf.Floor(UsefullUtils.GetValuePercent(_fullElapsedTime.Seconds, fullTime));
 
         _startRecord = false;
         Game.Instance.Ball.CanStopRecording = false;
+
+        PlayRecordButton.interactable = true;
     }
 
     public void PlayRecording()
     {
-        Debug.ClearDeveloperConsole();
-        Debug.Log(ReplayOptions.Count);
-
         if (ReplayOptions == null || ReplayOptions.Count == 0)
         {
             return;
         }
         _startRecord = false;
         _shotIndex = 0;
-        ReplayBall.transform.position = ReplayOptions[_shotIndex].BallPos;
-        ReplayBall.transform.eulerAngles = ReplayOptions[_shotIndex].BallRot;
+        Game.Instance.ReplayBall.transform.position = ReplayOptions[_shotIndex].BallPos;
+        Game.Instance.ReplayBall.transform.eulerAngles = ReplayOptions[_shotIndex].BallRot;
+
+        Game.Instance.CameraPositioning.CameraTrack = CameraTrack.Replay;
 
         PlayShot();
     }
@@ -82,23 +96,22 @@ public class ReplayController : MonoBehaviour
 
         if (_playId.HasValue)
         {
-            // LeanTween.descr(_playId.Value).pause();
             LeanTween.cancel(_playId.Value);
             _playId = null;
         }
         if (_playRotId.HasValue)
         {
-            // LeanTween.descr(_playRotId.Value).pause();
             LeanTween.cancel(_playRotId.Value);
             _playRotId = null;
         }
 
-        var time = UsefullUtils.GetPercent(ReplayOptions[_shotIndex].Seconds, _percentOffset);
+        float time = UsefullUtils.GetPercent(ReplayOptions[_shotIndex].Seconds, PercentOffset);
+        time += UsefullUtils.GetPercent(time, ReplaySpeed);
 
-        _playId = LeanTween.move(ReplayBall, ReplayOptions[_shotIndex].BallPos, time).id;
+        _playId = LeanTween.move(Game.Instance.ReplayBall, ReplayOptions[_shotIndex].BallPos, time).id;
         LeanTween.descr(_playId.Value).setEase(LeanTweenType.linear);
 
-        _playRotId = LeanTween.rotate(ReplayBall, ReplayOptions[_shotIndex].BallRot, time).id;
+        _playRotId = LeanTween.rotate(Game.Instance.ReplayBall, ReplayOptions[_shotIndex].BallRot, time).id;
         LeanTween.descr(_playRotId.Value).setEase(LeanTweenType.linear);
 
         LeanTween.descr(_playId.Value)
@@ -106,7 +119,6 @@ public class ReplayController : MonoBehaviour
             {
                 PlayShot();
             });
-        // Debug.Log(ReplayOptions[_shotIndex].String());
     }
 
     // Update is called once per frame
@@ -125,7 +137,7 @@ public class ReplayController : MonoBehaviour
             }
 
             frames++;
-            if (frames == 4)
+            if (frames == 5)
             {
                 frames = 0;
             }
@@ -141,13 +153,13 @@ public class ReplayController : MonoBehaviour
                 seconds = 1;
             }
 
-            var posX = (float)Math.Round((Double)Game.Instance.Ball.transform.position.x, 2);
-            var posY = (float)Math.Round((Double)Game.Instance.Ball.transform.position.y, 2);
-            var posZ = (float)Math.Round((Double)Game.Instance.Ball.transform.position.z, 2);
+            var posX = (float)Math.Round((Double)Game.Instance.Ball.transform.position.x, 3);
+            var posY = (float)Math.Round((Double)Game.Instance.Ball.transform.position.y, 3);
+            var posZ = (float)Math.Round((Double)Game.Instance.Ball.transform.position.z, 3);
 
-            var rotX = (float)Math.Round((Double)Game.Instance.Ball.transform.eulerAngles.x, 2);
-            var rotY = (float)Math.Round((Double)Game.Instance.Ball.transform.eulerAngles.y, 2);
-            var rotZ = (float)Math.Round((Double)Game.Instance.Ball.transform.eulerAngles.z, 2);
+            var rotX = (float)Math.Round((Double)Game.Instance.Ball.transform.eulerAngles.x, 3);
+            var rotY = (float)Math.Round((Double)Game.Instance.Ball.transform.eulerAngles.y, 3);
+            var rotZ = (float)Math.Round((Double)Game.Instance.Ball.transform.eulerAngles.z, 3);
 
             var replayOption = new ReplayOption()
             {

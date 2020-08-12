@@ -24,6 +24,7 @@ public class GameShooter : MonoBehaviour
 
     public void TryShoot()
     {
+        Game.Instance.CameraPositioning.CameraTrack = CameraTrack.Ball;
         var target = BootRb.transform.forward;
         // target = new Vector3(target.x, 0.5f, target.z);
 

@@ -14,6 +14,7 @@ public class Game : MonoBehaviour
     public Kicker Kicker;
     public CameraPositioning CameraPositioning;
     public GameShooter GameShooter;
+    public GameObject ReplayBall;
 
     void Awake()
     {

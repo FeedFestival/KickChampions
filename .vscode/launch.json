@@ -7,7 +7,7 @@
         {
             "name": "Unity Editor",
             "type": "unity",
-            "path": "/c:/GitProjects/KickChampions/Library/EditorInstance.json",
+            "path": "/c:/_workUnity/KickChampions/Library/EditorInstance.json",
             "request": "launch"
         },
         {
