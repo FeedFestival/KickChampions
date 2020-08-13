@@ -8,10 +8,23 @@ public class Kicker : MonoBehaviour
     public Vector3 OriginalPos;
     public Vector3 OriginalRot;
 
+    public Collider BootCollider;
+    public Vector3 OffsetKickerLookAt;
+
     // Start is called before the first frame update
     void Awake()
     {
         _rb = GetComponent<Rigidbody>();
+    }
+
+    void LateUpdate()
+    {
+        if (BootCollider == null)
+        {
+            return;
+        }
+        BootCollider.transform.LookAt(Game.Instance.HitPoint);
+        BootCollider.transform.eulerAngles += OffsetKickerLookAt;
     }
 
     void OnCollisionEnter(Collision col)

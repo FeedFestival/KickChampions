@@ -1,21 +1,27 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GameShooter : MonoBehaviour
 {
-    public Rigidbody BootRb;
+    public bool DebugVisually;
+    private Rigidbody _kickerRb;
     public float Force;
     public Transform HitPoint;
     public Toggle BroadcastCameraToggle;
     public bool BroadcastCameraOnShoot;
     private IEnumerator _tryShoot;
 
+    private Vector3 _kickerShootPos;
+    private Vector3 _shootingDirection;
+    private bool _paused;
+
     void Start()
     {
         BroadcastCameraToggle.isOn = BroadcastCameraOnShoot;
         Game.Instance.CameraPositioning.OnBroadcastCameraToggle(BroadcastCameraOnShoot);
+        _kickerRb = Game.Instance.Kicker.GetComponent<Rigidbody>();
+        Game.Instance.Kicker.BootCollider.enabled = false;
     }
 
     // Update is called once per frame
@@ -23,12 +29,24 @@ public class GameShooter : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.D))
         {
+            if (_paused) {
+                _paused = false;
+                Time.timeScale = 1;
+                return;
+            }
             TryShoot();
+        }
+
+        if (DebugVisually)
+        {
+            Debug.DrawRay(_kickerShootPos, _shootingDirection, Color.blue);
         }
     }
 
     public void TryShoot()
     {
+        Game.Instance.Kicker.BootCollider.enabled = true;
+
         _tryShoot = Shoot();
         StartCoroutine(_tryShoot);
 
@@ -42,20 +60,22 @@ public class GameShooter : MonoBehaviour
 
         Game.Instance.CameraPositioning.CameraTrack = CameraTrack.Ball;
 
-        // var target = BootRb.transform.forward;
-        var target = BootRb.transform.position - HitPoint.position;
-        // target = new Vector3(target.x, 0.5f, target.z);
+        _kickerShootPos = _kickerRb.transform.position + new Vector3(0.3f, 0, 0);
+        _shootingDirection = HitPoint.position - _kickerShootPos;
 
-        // Debug.Log(target);
-
-        var dir = (target - transform.position).normalized * Force;
-        // Debug.Log(dir);
-        BootRb.AddForce(dir, ForceMode.Impulse);
+        _shootingDirection = _shootingDirection.normalized * Force;
+        _kickerRb.AddForce(_shootingDirection, ForceMode.Impulse);
         //_rb.AddRelativeForce(dir, ForceMode.Acceleration);
 
         ReplayController.Instance.Record();
 
         StopCoroutine(_tryShoot);
         _tryShoot = null;
+
+        if (DebugVisually)
+        {
+            _paused = true;
+            Time.timeScale = 0;
+        }
     }
 }

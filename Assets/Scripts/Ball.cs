@@ -61,6 +61,10 @@ public class Ball : MonoBehaviour
 
     void OnCollisionEnter(Collision col)
     {
+        // Debug.Log(col.transform.gameObject.name);
+        // if (col.transform.gameObject.name == "_Kicker") {
+        //     Time.timeScale = 0;
+        // }
         // Debug.Log(_rb.velocity);
     }
 

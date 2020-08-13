@@ -75,17 +75,15 @@ public class CameraPositioning : MonoBehaviour
 
     public void MoveCamera(CameraPosition cameraPosition, bool instant = false)
     {
-        if (cameraPosition == CameraPosition)
+        // Debug.Log(cameraPosition);
+        if (cameraPosition == CameraPosition
+            || (cameraPosition == CameraPosition.Broadcast && _canBroadcastCamera == false))
         {
             return;
         }
         switch (cameraPosition)
         {
             case CameraPosition.Broadcast:
-                if (_canBroadcastCamera == false)
-                {
-                    return;
-                }
                 MoveToBroadcast(true);
 
                 break;
@@ -156,6 +154,7 @@ public class CameraPositioning : MonoBehaviour
 
     private void CancelIfRunning()
     {
+        // Debug.Log(CameraPosition);
         if (_moveId.HasValue)
         {
             LeanTween.cancel(_moveId.Value);

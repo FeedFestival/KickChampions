@@ -22,9 +22,11 @@ public class Game : MonoBehaviour
     }
     public Ball Ball;
     public Kicker Kicker;
+    public Transform HitPoint;
     public CameraPositioning CameraPositioning;
     public GameShooter GameShooter;
     public GameObject ReplayBall;
+    
 
     public GameState GameState;
 
