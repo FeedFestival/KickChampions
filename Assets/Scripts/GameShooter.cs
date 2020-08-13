@@ -6,6 +6,7 @@ public class GameShooter : MonoBehaviour
 {
     public Rigidbody BootRb;
     public float Force;
+    public Transform HitPoint;
 
     // Start is called before the first frame update
     void Start()
@@ -25,7 +26,9 @@ public class GameShooter : MonoBehaviour
     public void TryShoot()
     {
         Game.Instance.CameraPositioning.CameraTrack = CameraTrack.Ball;
-        var target = BootRb.transform.forward;
+
+        // var target = BootRb.transform.forward;
+        var target = BootRb.transform.position - HitPoint.position;
         // target = new Vector3(target.x, 0.5f, target.z);
 
         // Debug.Log(target);

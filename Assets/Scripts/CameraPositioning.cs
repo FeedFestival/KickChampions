@@ -4,6 +4,9 @@ using UnityEngine.UIElements;
 public enum CameraPosition
 {
     Shooting,
+    StartZoomBall,
+    ZoomBall,
+    ShootPower,
     Broadcast,
     TrackBall
 }
@@ -20,16 +23,34 @@ public class CameraPositioning : MonoBehaviour
     // public Toggle _broadcastCameraToggle;
     private bool _canBroadcastCamera;
 
+    [Header("Shooting Cam")]
     public Vector3 ShootingPos;
     public Vector3 ShootingRot;
     public float ShootingPersp;
+    [Header("Broadcast Cam")]
     public Vector3 BroadcastPos;
     public Vector3 BroadcastRot;
     public float BroadcastPersp;
+    [Header("StartZoom Cam")]
+    public Vector3 StartZoomPos;
+    public Vector3 StartZoomRot;
+    [Header("Zoom Ball Cam")]
+    public Vector3 ZoomBallPos;
+    public Vector3 ZoomBallRot;
+    public float ZoomBallPersp;
+    [Header("Shoot Power Cam")]
+    public Vector3 ShootPowerPos;
+    public Vector3 ShootPowerRot;
+    public float ShootPowerPersp;
+    [Header("Settings")]
     public Camera Camera;
     private bool _lookAt;
     public Vector3 LookAtVector;
     public CameraTrack CameraTrack;
+    private int? _moveId;
+    private int? _rotId;
+    private int? _perspectiveId;
+    private const float _moveTime = 1.5f;
 
     // Start is called before the first frame update
     void Awake()
@@ -69,10 +90,53 @@ public class CameraPositioning : MonoBehaviour
                     Camera.fieldOfView = ShootingPersp;
                     return;
                 }
+                else
+                {
+                    MoveSmooth(ShootingPos, ShootingRot, ShootingPersp, LeanTweenType.easeOutCirc);
+                }
+                break;
+            case CameraPosition.StartZoomBall:
+
+                MoveSmooth(StartZoomPos, StartZoomRot, ShootingPersp);
+                break;
+            case CameraPosition.ZoomBall:
+
+                MoveSmooth(ZoomBallPos, ZoomBallRot, ZoomBallPersp);
+                break;
+            case CameraPosition.ShootPower:
+
+                MoveSmooth(ShootPowerPos, ShootPowerRot, ShootPowerPersp, LeanTweenType.easeOutCirc);
                 break;
             default:
                 break;
         }
+    }
+
+    private void MoveSmooth(Vector3 pos, Vector3 rot, float perspective, LeanTweenType leanTweenType = LeanTweenType.linear)
+    {
+        if (_moveId.HasValue)
+        {
+            LeanTween.cancel(_moveId.Value);
+            _moveId = null;
+        }
+        if (_rotId.HasValue)
+        {
+            LeanTween.cancel(_rotId.Value);
+            _rotId = null;
+        }
+
+        _moveId = LeanTween.move(gameObject, pos, _moveTime).id;
+        LeanTween.descr(_moveId.Value).setEase(leanTweenType);
+        _rotId = LeanTween.rotate(gameObject, rot, _moveTime).id;
+        LeanTween.descr(_rotId.Value).setEase(leanTweenType);
+
+        var currentFieldOfView = Camera.fieldOfView;
+        _perspectiveId = LeanTween.value(Camera.gameObject, currentFieldOfView, perspective, _moveTime).id;
+        LeanTween.descr(_perspectiveId.Value).setEase(leanTweenType);
+        LeanTween.descr(_perspectiveId.Value).setOnUpdate((float value) =>
+        {
+            Camera.fieldOfView = value;
+        });
     }
 
     public void MoveToBroadcast(bool instant = false)
@@ -96,7 +160,9 @@ public class CameraPositioning : MonoBehaviour
         if (CameraTrack == CameraTrack.Ball)
         {
             transform.LookAt(Game.Instance.Ball.transform);
-        } else {
+        }
+        else
+        {
             transform.LookAt(Game.Instance.ReplayBall.transform);
         }
         var y = transform.eulerAngles.y > 90 ? BroadcastRot.y : transform.eulerAngles.y;
