@@ -3138,6 +3138,8 @@ MonoBehaviour:
   BootRb: {fileID: 1036348364}
   Force: 30
   HitPoint: {fileID: 1530553606}
+  BroadcastCameraToggle: {fileID: 203726741}
+  BroadcastCameraOnShoot: 1
 --- !u!1 &1316591775
 GameObject:
   m_ObjectHideFlags: 0

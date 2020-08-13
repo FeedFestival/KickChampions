@@ -21,8 +21,9 @@ public class CameraSensor : MonoBehaviour
     private int _layermask;
     private Vector3 _cameraPos;
     public MouseOver MouseOver;
-    private IEnumerator _shouldWeZoomInBall;
+    private IEnumerator _pressAndHold;
     private bool _mousePressed = false;
+    private bool _holdCheck = false;
 
     // Start is called before the first frame update
     void Awake()
@@ -33,25 +34,40 @@ public class CameraSensor : MonoBehaviour
 
     void Update()
     {
+        if (Game.Instance.GameState != GameState.LiningUpShot)
+        {
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
+            _mousePressed = true;
+            _holdCheck = true;
             if (MouseOver == MouseOver.Hitpoint)
             {
-                _mousePressed = true;
-                _shouldWeZoomInBall = ShouldWeZoomInBall();
+                _pressAndHold = PressAndHold();
                 Game.Instance.CameraPositioning.MoveCamera(CameraPosition.StartZoomBall);
-                StartCoroutine(_shouldWeZoomInBall);
+                StartCoroutine(_pressAndHold);
             }
             else if (MouseOver == MouseOver.ShootArea)
             {
-                EnterShootPower();
+                _pressAndHold = PressAndHold(true);
+                StartCoroutine(_pressAndHold);
+                // EnterShootPower();
             }
         }
 
         if (Input.GetMouseButtonUp(0))
         {
             _mousePressed = false;
-            CheckShouldWeZoomIn();
+
+            Debug.Log(_holdCheck);
+            if (_holdCheck)
+            {
+                CheckPressAndHold();
+                CancelZoom();
+                return;
+            }
 
             if (MouseOver == MouseOver.Nothing
                 || MouseOver == MouseOver.Hitpoint
@@ -65,6 +81,11 @@ public class CameraSensor : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (Game.Instance.GameState != GameState.LiningUpShot)
+        {
+            return;
+        }
+
         RaycastHit hit;
         Ray ray = Game.Instance.CameraPositioning.Camera.ScreenPointToRay(Input.mousePosition);
 
@@ -104,46 +125,67 @@ public class CameraSensor : MonoBehaviour
 
     void LateUpdate()
     {
+        if (Game.Instance.GameState != GameState.LiningUpShot)
+        {
+            return;
+        }
+
         _cameraPos = Game.Instance.CameraPositioning.transform.position;
         HiddenIcosphere.transform.LookAt(_cameraPos);
         FakeIcosphere.transform.LookAt(_cameraPos);
         HitPointCollider.transform.LookAt(_cameraPos);
     }
 
-    IEnumerator ShouldWeZoomInBall()
+    IEnumerator PressAndHold(bool _isOverShoot = false)
     {
-        yield return new WaitForSecondsRealtime(1f);
+        yield return new WaitForSecondsRealtime(_isOverShoot ? 0.33f : 1f);
+        _holdCheck = false;
 
-        if (_mousePressed)
+        if (_isOverShoot)
         {
-            if (MouseOver == MouseOver.Hitpoint)
+            if (MouseOver == MouseOver.ShootArea)
             {
-                EnterZoom();
-            }
-            else if (MouseOver == MouseOver.Nothing)
-            {
-                CancelZoom();
+                EnterShootPower();
             }
             else
             {
-                EnterShootPower();
+                CancelZoom();
             }
         }
         else
         {
-            CancelZoom();
+
+            if (_mousePressed)
+            {
+                if (MouseOver == MouseOver.Hitpoint)
+                {
+                    EnterZoom();
+                }
+                else if (MouseOver == MouseOver.Nothing)
+                {
+                    CancelZoom();
+                }
+                else
+                {
+                    EnterShootPower();
+                }
+            }
+            else
+            {
+                CancelZoom();
+            }
         }
 
-        CheckShouldWeZoomIn();
+        CheckPressAndHold();
     }
 
-    private bool CheckShouldWeZoomIn()
+    private bool CheckPressAndHold()
     {
-        bool _isInProgress = _shouldWeZoomInBall != null;
+        bool _isInProgress = _pressAndHold != null;
         if (_isInProgress)
         {
-            StopCoroutine(_shouldWeZoomInBall);
-            _shouldWeZoomInBall = null;
+            StopCoroutine(_pressAndHold);
+            _pressAndHold = null;
         }
         return !_isInProgress;
     }

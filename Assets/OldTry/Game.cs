@@ -2,11 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum GameState
+{
+    PlayerPrepare,
+    LiningUpShot,
+    DuringShooting,
+    InReplay
+}
+
 public class Game : MonoBehaviour
 {
     private static Game _game;
-    public static Game Instance {
-        get {
+    public static Game Instance
+    {
+        get
+        {
             return _game;
         }
     }
@@ -15,6 +25,8 @@ public class Game : MonoBehaviour
     public CameraPositioning CameraPositioning;
     public GameShooter GameShooter;
     public GameObject ReplayBall;
+
+    public GameState GameState;
 
     void Awake()
     {
@@ -28,6 +40,12 @@ public class Game : MonoBehaviour
 
     void Init()
     {
+        LineUpShot();
+    }
+
+    public void LineUpShot()
+    {
+        GameState = GameState.LiningUpShot;
         Ball.Reset();
         Kicker.Reset();
         CameraPositioning.MoveCamera(CameraPosition.Shooting, true);
@@ -38,7 +56,7 @@ public class Game : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.A))
         {
-            Init();
+            LineUpShot();
         }
     }
 }

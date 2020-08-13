@@ -40,25 +40,29 @@ public class ReplayController : MonoBehaviour
         PlayRecordButton.interactable = false;
     }
 
-    public void OnReplaySpeedChange() {
-        if (_replaySpeedSlider == null) {
+    public void OnReplaySpeedChange()
+    {
+        if (_replaySpeedSlider == null)
+        {
             _replaySpeedSlider = ReplaySpeedSlider.GetComponent<UnityEngine.UI.Slider>();
         }
         ReplaySpeed = (int)Mathf.Floor(_replaySpeedSlider.value * 100);
-        Debug.Log(ReplaySpeed);
+        // Debug.Log(ReplaySpeed);
     }
 
     public void Record()
     {
         _startTime = DateTime.Now.AddSeconds(60);
         _fullStartTime = DateTime.Now;
+        ReplayOptions = new List<ReplayOption>();
         _startRecord = true;
+        PlayRecordButton.interactable = false;
     }
 
     public void StopRecording()
     {
         _fullElapsedTime = DateTime.Now - _fullStartTime;
-        
+
         float fullTime = 0;
         ReplayOptions.ForEach(rp => fullTime += rp.Seconds);
 
@@ -68,6 +72,8 @@ public class ReplayController : MonoBehaviour
         Game.Instance.Ball.CanStopRecording = false;
 
         PlayRecordButton.interactable = true;
+
+        // Game.Instance.GameState = GameState.PlayerPrepare;
     }
 
     public void PlayRecording()
@@ -76,6 +82,9 @@ public class ReplayController : MonoBehaviour
         {
             return;
         }
+
+        Game.Instance.GameState = GameState.InReplay;
+
         _startRecord = false;
         _shotIndex = 0;
         Game.Instance.ReplayBall.transform.position = ReplayOptions[_shotIndex].BallPos;
@@ -124,13 +133,13 @@ public class ReplayController : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
+        if (Game.Instance.GameState != GameState.DuringShooting)
+        {
+            return;
+        }
+
         if (_startRecord)
         {
-            if (ReplayOptions == null)
-            {
-                ReplayOptions = new List<ReplayOption>();
-            }
-
             if (ReplayOptions.Count > 10)
             {
                 Game.Instance.Ball.CanStopRecording = true;

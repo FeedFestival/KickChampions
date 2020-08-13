@@ -19,8 +19,6 @@ public enum CameraTrack
 
 public class CameraPositioning : MonoBehaviour
 {
-    // public GameObject BroadcastCameraToggle;
-    // public Toggle _broadcastCameraToggle;
     private bool _canBroadcastCamera;
 
     [Header("Shooting Cam")]
@@ -51,6 +49,7 @@ public class CameraPositioning : MonoBehaviour
     private int? _rotId;
     private int? _perspectiveId;
     private const float _moveTime = 1.5f;
+    public CameraPosition CameraPosition;
 
     // Start is called before the first frame update
     void Awake()
@@ -61,16 +60,25 @@ public class CameraPositioning : MonoBehaviour
     void Start()
     {
         // _broadcastCameraToggle = BroadcastCameraToggle.GetComponent<Toggle>();
-        // _broadcastCameraToggle.value = true;
+        // _canBroadcastCamera = _broadcastCameraToggle.value = BroadcastCameraOnShoot;
     }
 
-    public void OnBroadcastCameraToggle()
+    public void OnBroadcastCameraToggle(bool? broadCastCamera = null)
     {
+        if (broadCastCamera.HasValue)
+        {
+            _canBroadcastCamera = broadCastCamera.Value;
+            return;
+        }
         _canBroadcastCamera = !_canBroadcastCamera;
     }
 
     public void MoveCamera(CameraPosition cameraPosition, bool instant = false)
     {
+        if (cameraPosition == CameraPosition)
+        {
+            return;
+        }
         switch (cameraPosition)
         {
             case CameraPosition.Broadcast:
@@ -85,10 +93,7 @@ public class CameraPositioning : MonoBehaviour
                 _lookAt = false;
                 if (instant)
                 {
-                    transform.position = ShootingPos;
-                    transform.eulerAngles = ShootingRot;
-                    Camera.fieldOfView = ShootingPersp;
-                    return;
+                    Move(ShootingPos, ShootingRot, ShootingPersp);
                 }
                 else
                 {
@@ -96,34 +101,34 @@ public class CameraPositioning : MonoBehaviour
                 }
                 break;
             case CameraPosition.StartZoomBall:
-
+                _lookAt = false;
                 MoveSmooth(StartZoomPos, StartZoomRot, ShootingPersp);
                 break;
             case CameraPosition.ZoomBall:
-
+                _lookAt = false;
                 MoveSmooth(ZoomBallPos, ZoomBallRot, ZoomBallPersp);
                 break;
             case CameraPosition.ShootPower:
-
+                _lookAt = false;
                 MoveSmooth(ShootPowerPos, ShootPowerRot, ShootPowerPersp, LeanTweenType.easeOutCirc);
                 break;
             default:
                 break;
         }
+        CameraPosition = cameraPosition;
+    }
+
+    private void Move(Vector3 pos, Vector3 rot, float perspective)
+    {
+        CancelIfRunning();
+        transform.position = pos;
+        transform.eulerAngles = rot;
+        Camera.fieldOfView = perspective;
     }
 
     private void MoveSmooth(Vector3 pos, Vector3 rot, float perspective, LeanTweenType leanTweenType = LeanTweenType.linear)
     {
-        if (_moveId.HasValue)
-        {
-            LeanTween.cancel(_moveId.Value);
-            _moveId = null;
-        }
-        if (_rotId.HasValue)
-        {
-            LeanTween.cancel(_rotId.Value);
-            _rotId = null;
-        }
+        CancelIfRunning();
 
         _moveId = LeanTween.move(gameObject, pos, _moveTime).id;
         LeanTween.descr(_moveId.Value).setEase(leanTweenType);
@@ -143,11 +148,28 @@ public class CameraPositioning : MonoBehaviour
     {
         if (instant)
         {
-            transform.position = BroadcastPos;
-            transform.eulerAngles = BroadcastRot;
-            Camera.fieldOfView = BroadcastPersp;
+            Move(BroadcastPos, BroadcastRot, BroadcastPersp);
             _lookAt = true;
             return;
+        }
+    }
+
+    private void CancelIfRunning()
+    {
+        if (_moveId.HasValue)
+        {
+            LeanTween.cancel(_moveId.Value);
+            _moveId = null;
+        }
+        if (_rotId.HasValue)
+        {
+            LeanTween.cancel(_rotId.Value);
+            _rotId = null;
+        }
+        if (_perspectiveId.HasValue)
+        {
+            LeanTween.cancel(_perspectiveId.Value);
+            _perspectiveId = null;
         }
     }
 

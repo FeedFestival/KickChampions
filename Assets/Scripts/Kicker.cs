@@ -17,7 +17,6 @@ public class Kicker : MonoBehaviour
     void OnCollisionEnter(Collision col)
     {
         col.gameObject.GetComponent<Ball>().Curve();
-        Game.Instance.CameraPositioning.MoveCamera(CameraPosition.Broadcast, true);
     }
 
     public void Reset()

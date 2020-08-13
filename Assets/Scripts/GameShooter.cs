@@ -1,17 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameShooter : MonoBehaviour
 {
     public Rigidbody BootRb;
     public float Force;
     public Transform HitPoint;
+    public Toggle BroadcastCameraToggle;
+    public bool BroadcastCameraOnShoot;
+    private IEnumerator _tryShoot;
 
-    // Start is called before the first frame update
     void Start()
     {
-
+        BroadcastCameraToggle.isOn = BroadcastCameraOnShoot;
+        Game.Instance.CameraPositioning.OnBroadcastCameraToggle(BroadcastCameraOnShoot);
     }
 
     // Update is called once per frame
@@ -25,6 +29,17 @@ public class GameShooter : MonoBehaviour
 
     public void TryShoot()
     {
+        _tryShoot = Shoot();
+        StartCoroutine(_tryShoot);
+
+        Game.Instance.GameState = GameState.DuringShooting;
+        Game.Instance.CameraPositioning.MoveCamera(CameraPosition.Broadcast, true);
+    }
+
+    private IEnumerator Shoot()
+    {
+        yield return new WaitForSeconds(0.2f);
+
         Game.Instance.CameraPositioning.CameraTrack = CameraTrack.Ball;
 
         // var target = BootRb.transform.forward;
@@ -39,5 +54,8 @@ public class GameShooter : MonoBehaviour
         //_rb.AddRelativeForce(dir, ForceMode.Acceleration);
 
         ReplayController.Instance.Record();
+
+        StopCoroutine(_tryShoot);
+        _tryShoot = null;
     }
 }
