@@ -25,19 +25,16 @@ public class GameShooter : MonoBehaviour
 
     public void TryShoot()
     {
+        // Time.timeScale = 0.1f;
+
         Game.Instance.CameraPositioning.CameraTrack = CameraTrack.Ball;
 
-        // var target = BootRb.transform.forward;
-        var target = BootRb.transform.position - HitPoint.position;
-        // target = new Vector3(target.x, 0.5f, target.z);
+        var target = (HitPoint.position - BootRb.transform.position).normalized;
+        // BootRb.transform.eulerAngles = Quaternion.LookRotation(target, BootRb.transform.up).eulerAngles;
 
-        // Debug.Log(target);
+        BootRb.AddForce(target * Force, ForceMode.Impulse);
 
-        var dir = (target - transform.position).normalized * Force;
-        // Debug.Log(dir);
-        BootRb.AddForce(dir, ForceMode.Impulse);
-        //_rb.AddRelativeForce(dir, ForceMode.Acceleration);
+        
 
-        ReplayController.Instance.Record();
     }
 }

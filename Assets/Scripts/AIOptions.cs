@@ -50,7 +50,7 @@ public class AIOptions : MonoBehaviour
                 TimeOutMagnus = 0.8f,
                 KickPos = new Vector3(-0.499f, 0.111f, -11.602f),
                 KickRot = new Vector3(-89.98f, 47.79f, 0),
-                GameShooterForce = 30
+                GameShooterForce = 28   // 30
             }
         };
     }
